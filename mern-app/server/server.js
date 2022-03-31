@@ -1,13 +1,28 @@
 const express = require("express");
-const app = express();
-const cors = require("cors");
-require("dotenv").config({ path: "./config.env"});
-const port = process.env.PORT || 3000;
-app.use(cors());
-app.use(express.json());
-app.use(require("./routes/record"));
-const db = require("./db/conn");
+const mongoose = require("mongoose");
+const Router = require("./routes");
+const dotenv = require('dotenv').config();
 
-app.listen(port, () => {
-  console.log(`Server is running on port: ${port}`)
+
+const app = express();
+
+app.use(express.json());
+
+mongoose.connect(process.env.DATABASE_URL,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  }
+);
+
+const db = mongoose.connection;
+db.on("error", console.error.bind(console, "connection error: "));
+db.once("open", function () {
+  console.log("Connected to MongoDB successfully");
+});
+
+app.use(Router);
+
+app.listen(3000, () => {
+  console.log("Server is running at port 3000");
 });
